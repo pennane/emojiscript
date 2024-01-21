@@ -38,7 +38,7 @@ export interface Program extends Node {
 function programString(this: Program): string {
   let out = ''
   for (const statement of this.statements) {
-    out += statement.string() + ' '
+    out += statement.string()
   }
   return out
 }
