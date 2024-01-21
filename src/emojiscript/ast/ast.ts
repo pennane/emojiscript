@@ -137,6 +137,26 @@ export interface BlockStatement extends Statement {
   statements: Statement[]
 }
 
+function blockStatementString(this: BlockStatement): string {
+  let out = ''
+  for (const statement of this.statements) {
+    out += statement.string()
+  }
+  return out
+}
+
+export const createBlockStatement = (
+  token: Token,
+  statements: Statement[]
+): BlockStatement => {
+  return {
+    __statementNode__,
+    string: blockStatementString,
+    token,
+    statements
+  }
+}
+
 export interface Identifier extends Expression {
   token: Token
   value: string
@@ -160,13 +180,21 @@ export interface Boolean extends Expression {
   value: boolean
 }
 
+function booleanString(this: Boolean): string {
+  return this.value ? 'true' : 'false'
+}
+
+export const createBoolean = (token: Token, value: boolean): Boolean => {
+  return { __expressionNode__, string: booleanString, token, value }
+}
+
 export interface NumberLiteral extends Expression {
   token: Token
   value: number
 }
 
 function numberLiteralString(this: NumberLiteral): string {
-  return this.token.literal
+  return String(this.value)
 }
 
 export const createNumberLiteral = (
@@ -192,7 +220,7 @@ function infixExpressionString(this: InfixExpression) {
   let out = ''
   out += '('
   out += this.left?.string() || 'null'
-  out += this.operator
+  out += ' ' + this.operator + ' '
   out += this.right?.string() || 'null'
   out += ')'
   return out
@@ -201,12 +229,13 @@ function infixExpressionString(this: InfixExpression) {
 export const createInfixExpression = (
   token: Token,
   left: Expression | null,
-  right: Expression | null
+  right: Expression | null,
+  operator: string
 ): InfixExpression => {
   return {
     __expressionNode__,
     string: infixExpressionString,
-    operator: token.literal,
+    operator,
     token,
     right,
     left
@@ -245,7 +274,37 @@ export interface IfExpression extends Expression {
   token: Token // The 'if' token
   condition: Expression
   consequence: BlockStatement
-  alternative: BlockStatement
+  alternative: BlockStatement | null
+}
+
+function ifExpressionString(this: IfExpression): string {
+  let out = ''
+  out += 'if '
+  out += this.condition.string()
+  out += ' then '
+  out += this.consequence.string()
+  if (this.alternative) {
+    out += ' else '
+    out += this.alternative.string()
+  }
+
+  return out
+}
+
+export const createIfExpression = (
+  token: Token,
+  condition: Expression,
+  consequence: BlockStatement,
+  alternative: BlockStatement | null
+): IfExpression => {
+  return {
+    __expressionNode__,
+    string: ifExpressionString,
+    token,
+    condition,
+    consequence,
+    alternative
+  }
 }
 
 export interface FunctionLiteral extends Expression {

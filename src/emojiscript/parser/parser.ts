@@ -1,7 +1,10 @@
 import {
+  BlockStatement,
+  Boolean,
   Expression,
   ExpressionStatement,
   Identifier,
+  IfExpression,
   InfixExpression,
   LetStatement,
   NumberLiteral,
@@ -9,9 +12,12 @@ import {
   Program,
   ReturnStatement,
   Statement,
+  createBlockStatement,
+  createBoolean,
   createExpression,
   createExpressionStatement,
   createIdentifier,
+  createIfExpression,
   createInfixExpression,
   createLetStatement,
   createNumberLiteral,
@@ -21,13 +27,7 @@ import {
 } from '../ast/ast'
 import { Lexer } from '../lexer/lexer'
 import { segmentEmojiString } from '../lib'
-import {
-  DELIMITER,
-  NUMBER_TO_TYPE,
-  OPERATOR,
-  Token,
-  TokenType
-} from '../token/token'
+import { DELIMITER, NUMBER_TO_TYPE, Token, TokenType } from '../token/token'
 
 type PrefixParseFn = () => Expression | null
 type InfixParseFn = (expression: Expression | null) => Expression | null
@@ -100,6 +100,10 @@ export class Parser {
     this.registerPrefixParser('NUMBER', this.parseNumberLiteral)
     this.registerPrefixParser('MINUS', this.parsePrefixExpression)
     this.registerPrefixParser('BANG', this.parsePrefixExpression)
+    this.registerPrefixParser('TRUE', this.parseBoolean)
+    this.registerPrefixParser('FALSE', this.parseBoolean)
+    this.registerPrefixParser('BLOCK_START', this.parseGroupedExpression)
+    this.registerPrefixParser('IF', this.parseIfExpression)
 
     this.registerInfixParser('PLUS', this.parseInfixExpression)
     this.registerInfixParser('MINUS', this.parseInfixExpression)
@@ -196,22 +200,28 @@ export class Parser {
   }
 
   private parseLetStatement(): LetStatement | null {
-    const letToken = this.currentToken
+    const letStatementToken = this.currentToken
+
     if (!this.expectPeek('IDENTIFIER')) {
       return null
     }
 
-    const name = createIdentifier(this.currentToken)
+    const identifierToken = this.currentToken
+
+    const name = createIdentifier(identifierToken)
 
     if (!this.expectPeek('ASSIGN')) {
       return null
     }
+    this.nextToken()
 
-    while (!this.currentSomeOf(['END_OF_FILE', 'END_OF_LINE'])) {
+    const value = this.parseExpression(ExpressionPrecedence.LOWEST)
+
+    if (this.peekIs('END_OF_LINE')) {
       this.nextToken()
     }
 
-    return createLetStatement(letToken, name, createExpression())
+    return createLetStatement(letStatementToken, name, value)
   }
 
   private parseReturnStatement(): ReturnStatement | null {
@@ -271,7 +281,12 @@ export class Parser {
     this.nextToken()
     const right = this.parseExpression(precedence)
 
-    return createInfixExpression(infixExpressionToken, left, right)
+    return createInfixExpression(
+      infixExpressionToken,
+      left,
+      right,
+      infixExpressionToken.type
+    )
   }
 
   private parseIdentifier(): Identifier {
@@ -287,5 +302,67 @@ export class Parser {
     }
 
     return createNumberLiteral(numberLiteralToken, value)
+  }
+
+  private parseBoolean(): Boolean {
+    const booleanToken = this.currentToken
+    return createBoolean(booleanToken, this.currentIs('TRUE'))
+  }
+
+  private parseGroupedExpression(): Expression | null {
+    this.nextToken()
+    const expression = this.parseExpression(ExpressionPrecedence.LOWEST)
+    if (!this.expectPeek('BLOCK_END')) {
+      return null
+    }
+    return expression
+  }
+
+  private parseIfExpression(): IfExpression | null {
+    const ifExpressionToken = this.currentToken
+
+    this.nextToken()
+    const condition = this.parseExpression(ExpressionPrecedence.LOWEST)
+
+    if (!condition) {
+      return null
+    }
+
+    if (!this.expectPeek('BLOCK_START')) {
+      return null
+    }
+
+    const consequence = this.parseBlockStatement()
+
+    if (!consequence) {
+      return null
+    }
+
+    let alternative: BlockStatement | null = null
+    if (this.peekIs('ELSE')) {
+      this.nextToken()
+      alternative = this.parseBlockStatement()
+    }
+
+    return createIfExpression(
+      ifExpressionToken,
+      condition,
+      consequence,
+      alternative
+    )
+  }
+
+  private parseBlockStatement(): BlockStatement | null {
+    const blockStatementToken = this.currentToken
+    const statements = []
+    this.nextToken()
+    while (!this.currentSomeOf(['BLOCK_END', 'END_OF_FILE', 'END_OF_LINE'])) {
+      const statement = this.parseStatement()
+      if (statement) {
+        statements.push(statement)
+      }
+      this.nextToken()
+    }
+    return createBlockStatement(blockStatementToken, statements)
   }
 }

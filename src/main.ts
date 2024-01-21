@@ -2,7 +2,13 @@ import { Repl } from './emojiscript/repl/repl'
 import { createKeyboard } from './keyboard/keyboard'
 import './style.css'
 
-const DEFAULT_VALUE = `📝 🅿️ℹ️ ➡️ 3️⃣⏺️1️⃣4️⃣🚀
+const DEFAULT_VALUE = `📝 🅰️ ➡️ 1️⃣🚀
+📝 🅱️ ➡️ 2️⃣🚀
+🤔 🅰️⚖️🅱️ 🌅
+  ✅
+🌇 ⤵️ 🌅
+  ❌
+🌇
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -20,7 +26,7 @@ const keyboard = createKeyboard(input)
 
 const repl = new Repl((parsed) => (output.textContent = parsed))
 
-input.addEventListener('change', (e: any) => repl.evaluate(e.target.value))
+input.addEventListener('input', (e: any) => repl.evaluate(e.target.value))
 input.value = DEFAULT_VALUE
 
 left.appendChild(input)
