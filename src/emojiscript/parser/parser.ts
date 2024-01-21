@@ -267,7 +267,6 @@ export class Parser {
     }
 
     let leftExpression = prefixFn()
-    console.log('left', leftExpression)
     while (!this.peekIs('END_OF_LINE') && precedence < this.peekPrecendence()) {
       const infix = this.infixParseFns.get(this.peekToken.type)
       if (!infix) {
@@ -277,7 +276,6 @@ export class Parser {
       this.nextToken()
 
       leftExpression = infix(leftExpression)
-      console.log('left', leftExpression)
     }
 
     return leftExpression
