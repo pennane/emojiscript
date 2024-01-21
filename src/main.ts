@@ -2,13 +2,15 @@ import { Repl } from './emojiscript/repl/repl'
 import { createKeyboard } from './keyboard/keyboard'
 import './style.css'
 
-const DEFAULT_VALUE = `📝 🅰️ ➡️ 1️⃣🚀
-📝 🅱️ ➡️ 2️⃣🚀
-🤔 🅰️⚖️🅱️ 🌅
-  ✅
-🌇 ⤵️ 🌅
-  ❌
+const DEFAULT_VALUE = `📝🆎➡️🔧🅰️🔸🅱️ 🌅
+    🅰️✖️🅱️
 🌇
+📝🅰️2️⃣➡️🔧🅰️ 🌅
+    🆎📭🅰️🔸2️⃣📬
+🌇
+
+1️⃣➕2️⃣✖️3️⃣✖️2️⃣
+
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!
