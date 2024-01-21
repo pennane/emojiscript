@@ -37,6 +37,8 @@ type InfixParseFn = (expression: Expression | null) => Expression | null
 
 enum ExpressionPrecedence {
   LOWEST = 0,
+  OR,
+  AND,
   EQUALS,
   LTGT,
   SUM,
@@ -53,7 +55,9 @@ const PRECEDENCES: Partial<Record<TokenType, ExpressionPrecedence>> = {
   EQ: ExpressionPrecedence.EQUALS,
   GT: ExpressionPrecedence.LTGT,
   LT: ExpressionPrecedence.LTGT,
-  CALL_START: ExpressionPrecedence.CALL
+  CALL_START: ExpressionPrecedence.CALL,
+  AND: ExpressionPrecedence.AND,
+  OR: ExpressionPrecedence.OR
 }
 
 const numberLiteralToNumber = (literal: string): number | null => {
@@ -118,6 +122,8 @@ export class Parser {
     this.registerInfixParser('EQ', this.parseInfixExpression)
     this.registerInfixParser('LT', this.parseInfixExpression)
     this.registerInfixParser('GT', this.parseInfixExpression)
+    this.registerInfixParser('AND', this.parseInfixExpression)
+    this.registerInfixParser('OR', this.parseInfixExpression)
     this.registerInfixParser('CALL_START', this.parseCallExpression)
   }
 
