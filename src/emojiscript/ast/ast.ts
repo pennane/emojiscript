@@ -88,20 +88,20 @@ export const createLetStatement = (
 
 export interface ReturnStatement extends Statement {
   token: Token
-  returnValue: Expression
+  returnValue: Expression | null
 }
 
 function returnStatementString(this: ReturnStatement): string {
   let out = ''
   out += this.token.literal + ' '
-  out += this.returnValue.string()
+  out += this.returnValue?.string() || null
   out += ';'
   return out
 }
 
 export const createReturnStatement = (
   token: Token,
-  expression: Expression
+  expression: Expression | null
 ): ReturnStatement => {
   return {
     __statementNode__,
@@ -310,11 +310,60 @@ export const createIfExpression = (
 export interface FunctionLiteral extends Expression {
   token: Token // The 'fn' token
   parameters: Identifier[]
-  body: BlockStatement
+  body: BlockStatement | null
+}
+
+function functionLiteralString(this: FunctionLiteral): string {
+  let out = ''
+  const params = this.parameters.map((p) => p.string()).join(', ')
+  out += this.token.literal
+  out += '('
+  out += params
+  out += ') '
+  out += this.body?.string() || 'null'
+  return out
+}
+
+export const createFunctionLiteral = (
+  token: Token,
+  parameters: Identifier[],
+  body: BlockStatement | null
+): FunctionLiteral => {
+  return {
+    __expressionNode__,
+    string: functionLiteralString,
+    token,
+    parameters,
+    body
+  }
 }
 
 export interface CallExpression extends Expression {
   token: Token // The '(' token
   function: Expression // Identifier or FunctionLiteral
   arguments: Expression[]
+}
+
+function callExpressionString(this: CallExpression) {
+  let out = ''
+  const args = this.arguments.map((a) => a.string()).join(', ')
+  out += this.function.string()
+  out += '('
+  out += args
+  out += ')'
+  return out
+}
+
+export const createCallExpression = (
+  token: Token,
+  fn: Expression,
+  args: Expression[]
+): CallExpression => {
+  return {
+    __expressionNode__,
+    string: callExpressionString,
+    token,
+    function: fn,
+    arguments: args
+  }
 }

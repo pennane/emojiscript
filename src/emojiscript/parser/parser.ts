@@ -1,8 +1,10 @@
 import {
   BlockStatement,
   Boolean,
+  CallExpression,
   Expression,
   ExpressionStatement,
+  FunctionLiteral,
   Identifier,
   IfExpression,
   InfixExpression,
@@ -14,8 +16,9 @@ import {
   Statement,
   createBlockStatement,
   createBoolean,
-  createExpression,
+  createCallExpression,
   createExpressionStatement,
+  createFunctionLiteral,
   createIdentifier,
   createIfExpression,
   createInfixExpression,
@@ -49,7 +52,8 @@ const PRECEDENCES: Partial<Record<TokenType, ExpressionPrecedence>> = {
   DIVISION: ExpressionPrecedence.PRODUCT,
   EQ: ExpressionPrecedence.EQUALS,
   GT: ExpressionPrecedence.LTGT,
-  LT: ExpressionPrecedence.LTGT
+  LT: ExpressionPrecedence.LTGT,
+  CALL_START: ExpressionPrecedence.CALL
 }
 
 const numberLiteralToNumber = (literal: string): number | null => {
@@ -103,7 +107,9 @@ export class Parser {
     this.registerPrefixParser('TRUE', this.parseBoolean)
     this.registerPrefixParser('FALSE', this.parseBoolean)
     this.registerPrefixParser('BLOCK_START', this.parseGroupedExpression)
+    this.registerPrefixParser('CALL_START', this.parseGroupedExpression)
     this.registerPrefixParser('IF', this.parseIfExpression)
+    this.registerPrefixParser('FUNCTION', this.parseFunctionLiteral)
 
     this.registerInfixParser('PLUS', this.parseInfixExpression)
     this.registerInfixParser('MINUS', this.parseInfixExpression)
@@ -112,6 +118,7 @@ export class Parser {
     this.registerInfixParser('EQ', this.parseInfixExpression)
     this.registerInfixParser('LT', this.parseInfixExpression)
     this.registerInfixParser('GT', this.parseInfixExpression)
+    this.registerInfixParser('CALL_START', this.parseCallExpression)
   }
 
   private registerPrefixParser(type: TokenType, fn: PrefixParseFn) {
@@ -227,10 +234,13 @@ export class Parser {
   private parseReturnStatement(): ReturnStatement | null {
     const returnToken = this.currentToken
     this.nextToken()
-    while (!this.currentSomeOf(['END_OF_FILE', 'END_OF_LINE'])) {
+    const value = this.parseExpression(ExpressionPrecedence.LOWEST)
+
+    if (this.peekIs('END_OF_LINE')) {
       this.nextToken()
     }
-    return createReturnStatement(returnToken, createExpression())
+
+    return createReturnStatement(returnToken, value)
   }
 
   private parseExpressionStatement(): ExpressionStatement | null {
@@ -296,6 +306,7 @@ export class Parser {
   private parseNumberLiteral(): NumberLiteral | null {
     const numberLiteralToken = this.currentToken
     const value = numberLiteralToNumber(numberLiteralToken.literal)
+    console.log(value)
     if (!value) {
       this.errorInvalidNumber(numberLiteralToken.literal)
       return null
@@ -310,9 +321,13 @@ export class Parser {
   }
 
   private parseGroupedExpression(): Expression | null {
+    const groupingToken = this.currentToken
     this.nextToken()
     const expression = this.parseExpression(ExpressionPrecedence.LOWEST)
-    if (!this.expectPeek('BLOCK_END')) {
+    if (groupingToken.type === 'CALL_START' && !this.expectPeek('CALL_END')) {
+      return null
+    }
+    if (groupingToken.type === 'BLOCK_START' && !this.expectPeek('BLOCK_END')) {
       return null
     }
     return expression
@@ -364,5 +379,65 @@ export class Parser {
       this.nextToken()
     }
     return createBlockStatement(blockStatementToken, statements)
+  }
+
+  private parseFunctionLiteral(): FunctionLiteral | null {
+    const functionLiteralToken = this.currentToken
+    const parameters = this.parseFunctionParameters()
+    if (!this.expectPeek('BLOCK_START')) {
+      return null
+    }
+    const body = this.parseBlockStatement()
+    return createFunctionLiteral(functionLiteralToken, parameters, body)
+  }
+
+  private parseFunctionParameters(): Identifier[] {
+    const identifiers: Identifier[] = []
+
+    if (this.peekIs('BLOCK_START')) {
+      return identifiers
+    }
+    this.nextToken()
+    identifiers.push(createIdentifier(this.currentToken))
+
+    while (this.peekIs('ARGUMENT_SEPARATOR')) {
+      this.nextToken()
+      this.nextToken()
+      identifiers.push(createIdentifier(this.currentToken))
+    }
+
+    return identifiers
+  }
+
+  private parseCallExpression(fn: Expression | null): CallExpression | null {
+    console.log('CALL EXPRESSION')
+    const callExpressionToken = this.currentToken
+    const args = this.parseCallArguments()
+    if (!args || !fn) return null
+    return createCallExpression(callExpressionToken, fn, args)
+  }
+
+  private parseCallArguments(): Expression[] | null {
+    const args: Expression[] = []
+    if (this.peekIs('CALL_END')) {
+      this.nextToken()
+      return args
+    }
+    this.nextToken()
+    args.push(createIdentifier(this.currentToken))
+
+    while (this.peekIs('ARGUMENT_SEPARATOR')) {
+      this.nextToken()
+      this.nextToken()
+      const expression = this.parseExpression(ExpressionPrecedence.LOWEST)
+      if (expression) {
+        args.push(expression)
+      }
+    }
+
+    if (!this.expectPeek('CALL_END')) {
+      return null
+    }
+    return args
   }
 }

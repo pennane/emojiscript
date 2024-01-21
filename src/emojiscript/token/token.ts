@@ -83,7 +83,9 @@ export const DELIMITER = {
   ARGUMENT_SEPARATOR: '🔸',
   END_OF_LINE: '🚀',
   BLOCK_START: '🌅',
-  BLOCK_END: '🌇'
+  BLOCK_END: '🌇',
+  CALL_START: '📭',
+  CALL_END: '📬'
 }
 
 export const DELIMITER_TO_TYPE = invertObj(DELIMITER)

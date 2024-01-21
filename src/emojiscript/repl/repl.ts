@@ -10,7 +10,7 @@ export class Repl {
     const errors = parser.getErrors()
 
     this.print(
-      JSON.stringify({ errors, string: program.string(), program }, null, 2)
+      JSON.stringify({ errors, string: program.string(), program }, null, 4)
     )
   }
 }
