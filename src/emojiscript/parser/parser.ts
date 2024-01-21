@@ -306,7 +306,6 @@ export class Parser {
   private parseNumberLiteral(): NumberLiteral | null {
     const numberLiteralToken = this.currentToken
     const value = numberLiteralToNumber(numberLiteralToken.literal)
-    console.log(value)
     if (!value) {
       this.errorInvalidNumber(numberLiteralToken.literal)
       return null
@@ -410,7 +409,6 @@ export class Parser {
   }
 
   private parseCallExpression(fn: Expression | null): CallExpression | null {
-    console.log('CALL EXPRESSION')
     const callExpressionToken = this.currentToken
     const args = this.parseCallArguments()
     if (!args || !fn) return null
