@@ -285,7 +285,7 @@ export class Parser {
       infixExpressionToken,
       left,
       right,
-      infixExpressionToken.type
+      infixExpressionToken.literal
     )
   }
 

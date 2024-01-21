@@ -59,7 +59,7 @@ export interface LetStatement extends Statement {
 function letStatementString(this: LetStatement) {
   let out = ''
 
-  out += this.token.literal + ' '
+  out += this.token.type + ' '
   out += this.name.string()
   out += ' = '
 

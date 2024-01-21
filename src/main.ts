@@ -13,6 +13,12 @@ const DEFAULT_VALUE = `📝 🅰️ ➡️ 1️⃣🚀
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
+const title = document.createElement('h1')
+title.textContent = 'emojiscript'
+
+const header = document.createElement('header')
+const main = document.createElement('main')
+
 const left = document.createElement('div')
 const right = document.createElement('div')
 
@@ -33,7 +39,12 @@ left.appendChild(input)
 left.appendChild(keyboard)
 right.appendChild(output)
 
-app.appendChild(left)
-app.appendChild(right)
+header.appendChild(title)
+
+main.appendChild(left)
+main.appendChild(right)
+
+app.appendChild(header)
+app.appendChild(main)
 
 repl.evaluate(input.value)
