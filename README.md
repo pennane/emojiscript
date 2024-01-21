@@ -1,23 +1,27 @@
-📝 🅿️ℹ️ ➡️ 3️⃣⏺️1️⃣4️⃣🚀
+# Emojiscript
 
-🔧🅰️ 🔸 ️🅱️ 🌅
-🤔 🅰️ ⚖️
-🌇🚀
+A toy language that accepts emoji and nothing else!
 
-📦🔑🅰️➡️1️⃣🔑🅱️➡️2️⃣🚀
+Built alongside with [Writing An Interpetter In Go](https://interpreterbook.com/)
 
-📦1️⃣🔸2️⃣🚀
+### Roadmap
 
-📝 🅰️ ➡️ 📦🔑🅰️➡️1️⃣🔑🅱️➡️2️⃣🚀
-🅰️🔍🅰️🚀
+- [x] lexer
+- [ ] parser
+- [ ] evaluator
 
+### Example syntax
+
+```
 📝 🅿️ℹ️ ➡️ 3️⃣⏺️1️⃣4️⃣🚀
 📝 ♓ℹ️Ⓜ️🅾️Ⓜ️ ➡️ 🔧🅰️ 🔸 ️🅱️ 🌅
-🤔 🅰️ 🔼 🅱️ 🌅
-🅰️
-🌇 ⤵️ 🌅
-🅱️
-🌇
+    🤔 🅰️ 🔼 🅱️ 🌅
+        🅰️
+    🌇 ⤵️ 🌅
+        🅱️
+    🌇
 🌇🚀
 
 📝 🅰️ ➡️ ♓ℹ️Ⓜ️🅾️Ⓜ️🌅🅿️ℹ️🔸3️⃣🌇🚀
+
+```
