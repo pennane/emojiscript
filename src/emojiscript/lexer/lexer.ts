@@ -98,7 +98,7 @@ export class Lexer {
   }
 
   private readOperator(): Token {
-    const type = OPERATOR_TO_TYPE[this.ch!]
+    const type = OPERATOR_TO_TYPE[this.ch! as keyof typeof OPERATOR_TO_TYPE]
     return newToken(type, this.ch!)
   }
 
@@ -115,7 +115,7 @@ export class Lexer {
   private readIdentifier(): Token {
     const startPosition = this.position
 
-    while (isCharacter(this.peekChar())) {
+    while (isCharacter(this.peekChar()) || isNumber(this.peekChar())) {
       this.readChar()
     }
 
