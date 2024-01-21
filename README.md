@@ -7,7 +7,7 @@ Built alongside with [Writing An Interpetter In Go](https://interpreterbook.com/
 ### Roadmap
 
 - [x] lexer
-- [ ] parser
+- [x] parser
 - [ ] evaluator
 
 ### Example syntax
