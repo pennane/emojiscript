@@ -183,9 +183,34 @@ export const createNumberLiteral = (
 
 export interface InfixExpression extends Expression {
   token: Token // The operator token, e.g. +
-  left: Expression
+  left: Expression | null
   operator: string
   right: Expression | null
+}
+
+function infixExpressionString(this: InfixExpression) {
+  let out = ''
+  out += '('
+  out += this.left?.string() || 'null'
+  out += this.operator
+  out += this.right?.string() || 'null'
+  out += ')'
+  return out
+}
+
+export const createInfixExpression = (
+  token: Token,
+  left: Expression | null,
+  right: Expression | null
+): InfixExpression => {
+  return {
+    __expressionNode__,
+    string: infixExpressionString,
+    operator: token.literal,
+    token,
+    right,
+    left
+  }
 }
 
 export interface PrefixExpression extends Expression {

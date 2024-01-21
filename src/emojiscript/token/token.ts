@@ -104,7 +104,7 @@ export const OPERATOR = {
   LT: '🔽',
   ASSIGN: '➡️',
   LOOKUP: '🔍'
-}
+} as const
 
 export const OPERATOR_TO_TYPE = invertObj(OPERATOR)
 

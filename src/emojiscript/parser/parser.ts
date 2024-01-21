@@ -2,6 +2,7 @@ import {
   Expression,
   ExpressionStatement,
   Identifier,
+  InfixExpression,
   LetStatement,
   NumberLiteral,
   PrefixExpression,
@@ -11,6 +12,7 @@ import {
   createExpression,
   createExpressionStatement,
   createIdentifier,
+  createInfixExpression,
   createLetStatement,
   createNumberLiteral,
   createPrefixExpression,
@@ -19,10 +21,16 @@ import {
 } from '../ast/ast'
 import { Lexer } from '../lexer/lexer'
 import { segmentEmojiString } from '../lib'
-import { DELIMITER, NUMBER_TO_TYPE, Token, TokenType } from '../token/token'
+import {
+  DELIMITER,
+  NUMBER_TO_TYPE,
+  OPERATOR,
+  Token,
+  TokenType
+} from '../token/token'
 
 type PrefixParseFn = () => Expression | null
-type InfixParseFn = (expression: Expression) => Expression | null
+type InfixParseFn = (expression: Expression | null) => Expression | null
 
 enum ExpressionPrecedence {
   LOWEST = 0,
@@ -32,6 +40,16 @@ enum ExpressionPrecedence {
   PRODUCT,
   PREFIX,
   CALL
+}
+
+const PRECEDENCES: Partial<Record<TokenType, ExpressionPrecedence>> = {
+  PLUS: ExpressionPrecedence.SUM,
+  MINUS: ExpressionPrecedence.SUM,
+  TIMES: ExpressionPrecedence.PRODUCT,
+  DIVISION: ExpressionPrecedence.PRODUCT,
+  EQ: ExpressionPrecedence.EQUALS,
+  GT: ExpressionPrecedence.LTGT,
+  LT: ExpressionPrecedence.LTGT
 }
 
 const numberLiteralToNumber = (literal: string): number | null => {
@@ -82,30 +100,27 @@ export class Parser {
     this.registerPrefixParser('NUMBER', this.parseNumberLiteral)
     this.registerPrefixParser('MINUS', this.parsePrefixExpression)
     this.registerPrefixParser('BANG', this.parsePrefixExpression)
+
+    this.registerInfixParser('PLUS', this.parseInfixExpression)
+    this.registerInfixParser('MINUS', this.parseInfixExpression)
+    this.registerInfixParser('DIVISION', this.parseInfixExpression)
+    this.registerInfixParser('TIMES', this.parseInfixExpression)
+    this.registerInfixParser('EQ', this.parseInfixExpression)
+    this.registerInfixParser('LT', this.parseInfixExpression)
+    this.registerInfixParser('GT', this.parseInfixExpression)
   }
 
   private registerPrefixParser(type: TokenType, fn: PrefixParseFn) {
     this.prefixParseFns.set(type, fn.bind(this))
+  }
+  private registerInfixParser(type: TokenType, fn: InfixParseFn) {
+    this.infixParseFns.set(type, fn.bind(this))
   }
 
   private nextToken() {
     this.currentToken = this.peekToken
     this.peekToken = this.lexer.nextToken()
     return this.currentToken
-  }
-
-  parseProgram(): Program {
-    const statements = []
-
-    while (this.currentToken.type !== 'END_OF_FILE') {
-      const statement = this.parseStatement()
-      if (statement !== null) {
-        statements.push(statement)
-      }
-      this.nextToken()
-    }
-
-    return createProgramNode(statements)
   }
 
   getErrors(): string[] {
@@ -138,10 +153,6 @@ export class Parser {
     return this.peekToken.type === type
   }
 
-  private peekSomeOf(types: TokenType[]): boolean {
-    return types.some(this.peekIs)
-  }
-
   private expectPeek(type: TokenType): boolean {
     if (this.peekToken.type === type) {
       this.nextToken()
@@ -149,6 +160,28 @@ export class Parser {
     }
     this.errorPeek(type)
     return false
+  }
+
+  private currentPrecendence(): ExpressionPrecedence {
+    return PRECEDENCES[this.currentToken.type] || ExpressionPrecedence.LOWEST
+  }
+
+  private peekPrecendence(): ExpressionPrecedence {
+    return PRECEDENCES[this.peekToken.type] || ExpressionPrecedence.LOWEST
+  }
+
+  parseProgram(): Program {
+    const statements = []
+
+    while (this.currentToken.type !== 'END_OF_FILE') {
+      const statement = this.parseStatement()
+      if (statement !== null) {
+        statements.push(statement)
+      }
+      this.nextToken()
+    }
+
+    return createProgramNode(statements)
   }
 
   private parseStatement(): Statement | null {
@@ -201,11 +234,25 @@ export class Parser {
 
   private parseExpression(precedence: ExpressionPrecedence): Expression | null {
     const prefixFn = this.prefixParseFns.get(this.currentToken.type)
+
     if (!prefixFn) {
       this.errorNoPrefixParseFn(this.currentToken.type)
       return null
     }
-    const leftExpression = prefixFn()
+
+    let leftExpression = prefixFn()
+
+    while (!this.peekIs('END_OF_LINE') && precedence < this.peekPrecendence()) {
+      const infix = this.infixParseFns.get(this.peekToken.type)
+      if (!infix) {
+        return leftExpression
+      }
+
+      this.nextToken()
+
+      leftExpression = infix(leftExpression)
+    }
+
     return leftExpression
   }
 
@@ -214,6 +261,17 @@ export class Parser {
     this.nextToken()
     const right = this.parseExpression(ExpressionPrecedence.PREFIX)
     return createPrefixExpression(prefixExpressionToken, right)
+  }
+
+  private parseInfixExpression(
+    left: Expression | null
+  ): InfixExpression | null {
+    const infixExpressionToken = this.currentToken
+    const precedence = this.currentPrecendence()
+    this.nextToken()
+    const right = this.parseExpression(precedence)
+
+    return createInfixExpression(infixExpressionToken, left, right)
   }
 
   private parseIdentifier(): Identifier {
