@@ -374,6 +374,9 @@ export class Parser {
     let alternative: BlockStatement | null = null
     if (this.peekIs('ELSE')) {
       this.nextToken()
+      if (!this.expectPeek('BLOCK_START')) {
+        return null
+      }
       alternative = this.parseBlockStatement()
     }
 
@@ -389,7 +392,7 @@ export class Parser {
     const blockStatementToken = this.currentToken
     const statements = []
     this.nextToken()
-    while (!this.currentSomeOf(['BLOCK_END', 'END_OF_FILE', 'END_OF_LINE'])) {
+    while (!this.currentSomeOf(['BLOCK_END', 'END_OF_FILE'])) {
       const statement = this.parseStatement()
       if (statement) {
         statements.push(statement)
