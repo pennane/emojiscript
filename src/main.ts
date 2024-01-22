@@ -3,13 +3,11 @@ import { createKeyboard } from './keyboard/keyboard'
 import './style.css'
 
 const DEFAULT_VALUE = `📝🆎➡️🔧🅰️🔸🅱️ 🌅
-    🅰️✖️🅱️
-🌇
-📝🅰️2️⃣➡️🔧🅰️ 🌅
-    🆎📭🅰️🔸2️⃣📬
+    🅰️➕🅱️
 🌇
 
-🅰️2️⃣📭3️⃣📬
+🆎📭2️⃣🔸3️⃣📬
+
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!
