@@ -1,4 +1,5 @@
 import { BlockStatement, Identifier, Statement } from '../ast/ast'
+import { LRUCache } from '../lib'
 import { Environment } from './environment'
 
 export enum DataObjectType {
@@ -23,12 +24,20 @@ function numberInspect(this: NumberObject): string {
   return String(this.value)
 }
 
+const numberCache = new LRUCache<number, NumberObject>(100)
+
 export const createNumber = (value: number): NumberObject => {
-  return {
+  const cached = numberCache.get(value)
+  if (cached) {
+    return cached
+  }
+  const newObject = {
     type: DataObjectType.Number,
     inspect: numberInspect,
     value
   }
+  numberCache.put(value, newObject)
+  return newObject
 }
 
 export const isNumber = (obj: DataObject): obj is NumberObject => {
