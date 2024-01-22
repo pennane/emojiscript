@@ -2,12 +2,15 @@ import { Repl } from './emojiscript/repl/repl'
 import { createKeyboard } from './keyboard/keyboard'
 import './style.css'
 
-const DEFAULT_VALUE = `📝🆎➡️🔧🅰️🔸🅱️ 🌅
-    🅰️➕🅱️
+const DEFAULT_VALUE = `💬 fibonacci
+📝🅰️➡️🔧🅱️ 🌅
+  🤔 🅱️ 🔽 1️⃣ 🌅 🔙0️⃣ 🌇
+  🤔 🅱️ ⚖️ 1️⃣ 🌅 🔙1️⃣ 🌇
+  🅰️📭🅱️➖1️⃣📬 ➕ 🅰️📭🅱️➖2️⃣📬
 🌇
 
-🆎📭2️⃣🔸3️⃣📬
 
+🅰️📭7️⃣📬
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!
