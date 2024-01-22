@@ -9,22 +9,17 @@ export class Repl {
     const lexer = new Lexer(code)
     const parser = new Parser(lexer)
     const program = parser.parseProgram()
-    const errors = parser.getErrors()
+
+    const syntaxErrors = parser.getErrors()
+
+    if (syntaxErrors.length > 0) {
+      return this.print(syntaxErrors.map((e) => `Error: ${e}`).join('\n'))
+    }
 
     const environment = new Environment()
 
     const evaluated = evaluate(program, environment).inspect()
 
-    this.print(
-      JSON.stringify(
-        {
-          evaluated: evaluated,
-          ast: { string: program.string(), errors, program },
-          environment: environment.entries()
-        },
-        null,
-        4
-      )
-    )
+    this.print(evaluated)
   }
 }

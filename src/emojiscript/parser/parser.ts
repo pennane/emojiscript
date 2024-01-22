@@ -137,6 +137,11 @@ export class Parser {
   private nextToken() {
     this.currentToken = this.peekToken
     this.peekToken = this.lexer.nextToken()
+
+    if (this.currentIs('ILLEGAL')) {
+      this.errorIllegalSymbol(this.currentToken.literal)
+    }
+
     return this.currentToken
   }
 
@@ -158,8 +163,12 @@ export class Parser {
     this.errors.push(`Invalid number. Could not parse ${value} to number`)
   }
 
+  private errorIllegalSymbol(value: string) {
+    this.errors.push(`Illegal symbol. Can not parse symbol "${value}"`)
+  }
+
   private currentIs(type: TokenType): boolean {
-    return this.currentToken.type === type
+    return this?.currentToken?.type === type
   }
 
   private currentSomeOf(types: TokenType[]): boolean {
@@ -295,6 +304,11 @@ export class Parser {
     const precedence = this.currentPrecendence()
     this.nextToken()
     const right = this.parseExpression(precedence)
+
+    if (!right) {
+      this.errors.push('Missing right side of infix expression')
+      return null
+    }
 
     return createInfixExpression(
       infixExpressionToken,

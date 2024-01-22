@@ -31,7 +31,17 @@ output.classList.add('output')
 
 const keyboard = createKeyboard(input)
 
-const repl = new Repl((parsed) => (output.textContent = parsed))
+const printLine = (line: string) => {
+  while (output.firstChild) {
+    output.removeChild(output.firstChild)
+  }
+  const el = document.createElement('pre')
+  el.classList.add('line')
+  el.textContent = line
+  output.appendChild(el)
+}
+
+const repl = new Repl(printLine)
 
 input.addEventListener('input', (e: any) => repl.evaluate(e.target.value))
 input.value = DEFAULT_VALUE
