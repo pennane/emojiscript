@@ -22,8 +22,8 @@ body {
   flex-direction: column;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 10rem;
   margin: 1rem;
+  margin-bottom: 10rem;
 }
 
 main {
