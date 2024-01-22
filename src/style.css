@@ -9,12 +9,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
 #app {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 10rem;
+  margin: 1rem;
 }
 
 main {
@@ -23,25 +32,77 @@ main {
   flex-wrap: wrap;
 }
 
+main > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 h1 {
-  font-family: monospace;
-  margin: 0.5rem;
+  font-family: 'inter';
+  margin: 0;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  background-color: hsl(220 13% 88% / 1);
+  width: fit-content;
+  padding-top: 0.75rem;
+  padding-left: 1rem;
+}
+
+.line-numbers {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 1.5rem;
+
+  overflow: hidden;
+  padding-top: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.line-numbers > div {
+  height: 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: hsl(222.35deg 13.82% 24.12%);
+  font-weight: 500;
 }
 
 .input {
-  width: 19rem;
+  width: 21rem;
   height: 15rem;
   min-height: 4rem;
   min-width: 12rem;
   max-width: 32rem;
-  margin: 0.5rem;
   font-size: 1.1rem;
+  font-family: 'Fire Code', monospace;
+
+  white-space: nowrap;
+
+  margin-left: 1rem;
+  background-color: transparent;
+  color: hsl(219 14% 24% / 1);
+  border: none;
+
+  padding: 0 1rem;
+  line-height: 1.5rem;
 }
 
 .output {
   font-size: 0.75rem;
-  margin: 0.5rem;
   white-space: pre-wrap;
+  margin: 0;
+}
+
+.output .line {
+  margin: 0;
 }
 
 .keyboard {
@@ -49,7 +110,6 @@ h1 {
   flex-wrap: wrap;
   gap: 0.25rem;
   max-width: 16rem;
-  margin: 0.5rem;
 }
 
 .keyboard .section {
@@ -69,7 +129,7 @@ h1 {
   margin: 0;
   font-size: 0.75rem;
   display: inline;
-  font-family: monospace;
+  font-family: 'Fire Code', monospace;
   font-weight: 300;
 }
 .keyboard button {

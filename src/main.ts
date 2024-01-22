@@ -24,6 +24,17 @@ const main = document.createElement('main')
 const left = document.createElement('div')
 const right = document.createElement('div')
 
+const inputContainer = document.createElement('div')
+inputContainer.classList.add('input-container')
+const lineNumbers = document.createElement('aside')
+lineNumbers.classList.add('line-numbers')
+
+for (let i = 1; i <= 100; i++) {
+  const line = document.createElement('div')
+  line.textContent = String(i)
+  lineNumbers.appendChild(line)
+}
+
 const input = document.createElement('textarea')
 input.classList.add('input')
 
@@ -47,7 +58,10 @@ const repl = new Repl(printLine)
 input.addEventListener('input', (e: any) => repl.evaluate(e.target.value))
 input.value = DEFAULT_VALUE
 
-left.appendChild(input)
+inputContainer.appendChild(lineNumbers)
+inputContainer.appendChild(input)
+
+left.appendChild(inputContainer)
 left.appendChild(keyboard)
 right.appendChild(output)
 
