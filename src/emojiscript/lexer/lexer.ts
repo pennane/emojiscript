@@ -68,13 +68,11 @@ export class Lexer {
 
   private skipWhitespace(): void {
     this.readChar()
-    let c = this.ch
-    if (c === null) {
+    if (this.ch === null) {
       return
     }
-    while (hasWhitespace(c)) {
+    while (hasWhitespace(this.ch)) {
       this.readChar()
-      c = this.ch
     }
   }
 
@@ -84,7 +82,8 @@ export class Lexer {
     while (this.ch !== '\n' && this.ch !== null) {
       this.readChar()
     }
-    this.readChar()
+    this.skipWhitespace()
+    this.skipComments()
   }
 
   private readNumber(): Token {
