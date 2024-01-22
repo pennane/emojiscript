@@ -4,6 +4,8 @@ A toy language that accepts emoji and nothing else!
 
 Built alongside with [Writing An Interpetter In Go](https://interpreterbook.com/)
 
+”we’re not trying to reinvent the wheel, but to learn something”
+
 ### Roadmap
 
 - [x] lexer

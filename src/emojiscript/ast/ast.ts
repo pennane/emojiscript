@@ -3,7 +3,26 @@ import { Token } from '../token/token'
 const __statementNode__ = () => {}
 const __expressionNode__ = () => {}
 
+export enum NodeType {
+  Statement = 'statement',
+  Expression = 'expression',
+  Program = 'program',
+  LetStatement = 'let_statement',
+  ReturnStatement = 'return_statement',
+  ExpressionStatement = 'expression_statement',
+  BlockStatement = 'block_statement',
+  Identifier = 'identifier',
+  Boolean = 'boolean',
+  NumberLiteral = 'number_literal',
+  InfixExpression = 'infix_expression',
+  PrefixExpression = 'prefix_expression',
+  IfExpression = 'if_expression',
+  FunctionLiteral = 'function_literal',
+  CallExpression = 'call_expression'
+}
+
 export interface Node {
+  type: NodeType
   string: () => string
 }
 
@@ -12,11 +31,15 @@ export interface Statement extends Node {
 }
 
 function statementString(this: Statement): string {
-  return 'statement'
+  return NodeType.Statement
 }
 
 export const createStatement = (): Statement => {
-  return { __statementNode__, string: statementString }
+  return {
+    __statementNode__,
+    type: NodeType.Statement,
+    string: statementString
+  }
 }
 
 export interface Expression extends Node {
@@ -24,11 +47,15 @@ export interface Expression extends Node {
 }
 
 function expressionString(this: Expression): string {
-  return 'expression'
+  return NodeType.Expression
 }
 
 export const createExpression = (): Expression => {
-  return { __expressionNode__, string: expressionString }
+  return {
+    __expressionNode__,
+    type: NodeType.Expression,
+    string: expressionString
+  }
 }
 
 export interface Program extends Node {
@@ -46,6 +73,7 @@ function programString(this: Program): string {
 export const createProgramNode = (statements: Statement[]): Program => {
   return {
     string: programString,
+    type: NodeType.Program,
     statements
   }
 }
@@ -80,6 +108,7 @@ export const createLetStatement = (
   return {
     __statementNode__,
     string: letStatementString,
+    type: NodeType.LetStatement,
     name,
     value,
     token
@@ -105,6 +134,7 @@ export const createReturnStatement = (
 ): ReturnStatement => {
   return {
     __statementNode__,
+    type: NodeType.ReturnStatement,
     string: returnStatementString,
     returnValue: expression,
     token
@@ -126,6 +156,7 @@ export const createExpressionStatement = (
 ): ExpressionStatement => {
   return {
     __statementNode__,
+    type: NodeType.ExpressionStatement,
     string: expressionStatementString,
     expression,
     token
@@ -151,6 +182,7 @@ export const createBlockStatement = (
 ): BlockStatement => {
   return {
     __statementNode__,
+    type: NodeType.BlockStatement,
     string: blockStatementString,
     token,
     statements
@@ -169,6 +201,7 @@ function identifierString(this: Identifier): string {
 export const createIdentifier = (token: Token): Identifier => {
   return {
     __expressionNode__,
+    type: NodeType.Identifier,
     string: identifierString,
     value: token.literal,
     token
@@ -185,7 +218,13 @@ function booleanString(this: Boolean): string {
 }
 
 export const createBoolean = (token: Token, value: boolean): Boolean => {
-  return { __expressionNode__, string: booleanString, token, value }
+  return {
+    __expressionNode__,
+    type: NodeType.Boolean,
+    string: booleanString,
+    token,
+    value
+  }
 }
 
 export interface NumberLiteral extends Expression {
@@ -203,6 +242,7 @@ export const createNumberLiteral = (
 ): NumberLiteral => {
   return {
     __expressionNode__,
+    type: NodeType.NumberLiteral,
     string: numberLiteralString,
     token,
     value
@@ -234,6 +274,7 @@ export const createInfixExpression = (
 ): InfixExpression => {
   return {
     __expressionNode__,
+    type: NodeType.InfixExpression,
     string: infixExpressionString,
     operator,
     token,
@@ -263,6 +304,7 @@ export const createPrefixExpression = (
 ): PrefixExpression => {
   return {
     __expressionNode__,
+    type: NodeType.PrefixExpression,
     string: prefixExpressionString,
     operator: token.literal,
     token,
@@ -299,6 +341,7 @@ export const createIfExpression = (
 ): IfExpression => {
   return {
     __expressionNode__,
+    type: NodeType.IfExpression,
     string: ifExpressionString,
     token,
     condition,
@@ -331,6 +374,7 @@ export const createFunctionLiteral = (
 ): FunctionLiteral => {
   return {
     __expressionNode__,
+    type: NodeType.FunctionLiteral,
     string: functionLiteralString,
     token,
     parameters,
@@ -361,6 +405,7 @@ export const createCallExpression = (
 ): CallExpression => {
   return {
     __expressionNode__,
+    type: NodeType.CallExpression,
     string: callExpressionString,
     token,
     function: fn,

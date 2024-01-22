@@ -1,3 +1,4 @@
+import { evaluate } from '../evaluator/evaluator'
 import { Lexer } from '../lexer/lexer'
 import { Parser } from '../parser/parser'
 
@@ -8,9 +9,20 @@ export class Repl {
     const parser = new Parser(lexer)
     const program = parser.parseProgram()
     const errors = parser.getErrors()
+    let evaluated
+
+    try {
+      evaluated = evaluate(program)
+    } catch (e: any) {
+      evaluated = e.message
+    }
 
     this.print(
-      JSON.stringify({ errors, string: program.string(), program }, null, 4)
+      JSON.stringify(
+        { evaluated, ast: { string: program.string(), errors, program } },
+        null,
+        4
+      )
     )
   }
 }
