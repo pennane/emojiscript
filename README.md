@@ -27,4 +27,23 @@ Built alongside with [Writing An Interpetter In Go](https://interpreterbook.com/
 
 📝 🅰️ ➡️ ♓ℹ️Ⓜ️🅾️Ⓜ️📭🅿️ℹ️ 🔸 3️⃣📬🚀
 
+🅰️
+```
+
+(same approximated in js)
+
+```js
+const PI = 3.14
+
+const HIMOM = (A, B) => {
+  if (A > B) {
+    return A
+  } else {
+    return B
+  }
+}
+
+const A = HIMOM(PI, 3)
+
+A // 3.14
 ```
