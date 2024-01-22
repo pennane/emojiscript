@@ -196,6 +196,9 @@ const evaluateIntegerInfixExpression = (
       return createNumber(leftValue * rightValue)
     }
     case OPERATOR.DIVISION: {
+      if (rightValue === 0) {
+        return createError('Cannot divide with zero. Impossible!')
+      }
       return createNumber(leftValue / rightValue)
     }
     case OPERATOR.GT: {
