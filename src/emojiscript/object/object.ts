@@ -1,9 +1,13 @@
+import { BlockStatement, Identifier, Statement } from '../ast/ast'
+import { Environment } from './environment'
+
 export enum DataObjectType {
   Number = 'number',
   Boolean = 'boolean',
   Null = 'null',
   ReturnValue = 'return_value',
-  Error = 'error'
+  Error = 'error',
+  Function = 'function'
 }
 
 export type DataObject = {
@@ -115,4 +119,42 @@ export const createError = (message: string): ErrorObject => {
 
 export const isError = (obj: DataObject): obj is ErrorObject => {
   return obj.type === DataObjectType.Error
+}
+
+export interface FunctionObject extends DataObject {
+  parameters: Identifier[]
+  body: BlockStatement
+  environment: Environment
+}
+
+function functionInspect(this: FunctionObject) {
+  let out = ''
+  const params = this.parameters.map((p) => p.string()).join(', ')
+
+  out += 'fn'
+  out += '('
+  out += params
+  out += ') { '
+  out += this.body.string()
+  out += ' }'
+
+  return out
+}
+
+export const createFunction = (
+  parameters: Identifier[],
+  body: BlockStatement,
+  environment: Environment
+): FunctionObject => {
+  return {
+    type: DataObjectType.Function,
+    inspect: functionInspect,
+    parameters,
+    body,
+    environment
+  }
+}
+
+export const isFunction = (obj: DataObject): obj is FunctionObject => {
+  return obj.type === DataObjectType.Function
 }

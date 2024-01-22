@@ -1,7 +1,10 @@
 import {
   BlockStatement,
   Boolean,
+  CallExpression,
+  Expression,
   ExpressionStatement,
+  FunctionLiteral,
   Identifier,
   IfExpression,
   InfixExpression,
@@ -18,14 +21,17 @@ import {
   BooleanObject,
   DataObject,
   DataObjectType,
+  FunctionObject,
   NumberObject,
   createBoolean,
   createError,
+  createFunction,
   createNull,
   createNumber,
   createReturnValue,
   isBoolean,
   isError,
+  isFunction,
   isNull,
   isNumber,
   isReturnValue
@@ -54,6 +60,7 @@ export const evaluate = (
   if (!evaluate) {
     return notImplemented(node)
   }
+
   return evaluator(node, environment)
 }
 
@@ -296,6 +303,79 @@ const evaluateIdentifier = (
   return value
 }
 
+const evaluateFunctionLiteral = (
+  node: FunctionLiteral,
+  environment: Environment
+): DataObject => {
+  const params = node.parameters
+  const body = node.body
+  if (!body) {
+    return createError(`Missing function body`)
+  }
+  return createFunction(params, body, environment)
+}
+
+const evaluateCallExpression = (
+  node: CallExpression,
+  environment: Environment
+): DataObject => {
+  const fn = evaluate(node.function, environment) as FunctionObject
+  if (isError(fn)) {
+    return fn
+  }
+  const args = evaluateExpressions(node.arguments, environment)
+  if (args.length > 0 && isError(args[0])) {
+    return args[0]
+  }
+
+  return applyFunction(fn, args)
+}
+
+const applyFunction = (fn: DataObject, args: DataObject[]): DataObject => {
+  if (!isFunction(fn)) {
+    return createError(`expected a function, got: ${fn.type}`)
+  }
+  const extendedEnvironment = extendFunctionEnvironment(fn, args)
+  const evaluated = evaluate(fn.body, extendedEnvironment)
+  return unwrapReturnValue(evaluated)
+}
+
+const extendFunctionEnvironment = (
+  fn: FunctionObject,
+  args: DataObject[]
+): Environment => {
+  const environment = new Environment(fn.environment)
+
+  fn.parameters.forEach((param, i) => {
+    environment.set(param.value, args[i])
+  })
+
+  return environment
+}
+
+const unwrapReturnValue = (obj: DataObject): DataObject => {
+  if (isReturnValue(obj)) {
+    return obj.value
+  }
+  return obj
+}
+
+const evaluateExpressions = (
+  expressions: Expression[],
+  environment: Environment
+): DataObject[] => {
+  const result: DataObject[] = []
+  for (const exp of expressions) {
+    const evaluated = evaluate(exp, environment)
+    if (isError(evaluated)) {
+      return [evaluated as DataObject]
+    }
+    result.push(evaluated)
+  }
+
+  return result
+}
+
 const EVALUATORS: Record<NodeType, (n: any, e: Environment) => DataObject> = {
   [NodeType.Statement]: notImplemented,
   [NodeType.Expression]: notImplemented,
@@ -310,6 +390,6 @@ const EVALUATORS: Record<NodeType, (n: any, e: Environment) => DataObject> = {
   [NodeType.InfixExpression]: evaluateInfixExpression,
   [NodeType.PrefixExpression]: evaluatePrefixExpression,
   [NodeType.IfExpression]: evaluateIfExpression,
-  [NodeType.FunctionLiteral]: notImplemented,
-  [NodeType.CallExpression]: notImplemented
+  [NodeType.FunctionLiteral]: evaluateFunctionLiteral,
+  [NodeType.CallExpression]: evaluateCallExpression
 }

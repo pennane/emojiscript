@@ -9,8 +9,7 @@ const DEFAULT_VALUE = `📝🆎➡️🔧🅰️🔸🅱️ 🌅
     🆎📭🅰️🔸2️⃣📬
 🌇
 
-1️⃣➕2️⃣✖️3️⃣✖️2️⃣
-
+🅰️2️⃣📭3️⃣📬
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!
