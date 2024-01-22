@@ -15,6 +15,7 @@
 
 body {
   margin: 0;
+  background-color: hsl(225 13% 90% / 1);
 }
 
 #app {
@@ -29,13 +30,19 @@ body {
 main {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: wrap-reverse;
 }
 
 main > div {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
+  align-items: baseline;
+}
+
+.left {
+  flex-direction: row;
+  flex-wrap: wrap-reverse;
+  align-items: flex-end;
 }
 
 h1 {
@@ -50,6 +57,7 @@ h1 {
   width: fit-content;
   padding-top: 0.75rem;
   padding-left: 1rem;
+  box-shadow: inset 0 1px 1px 0 rgb(0 0 0 / 0.05);
 }
 
 .line-numbers {
@@ -73,6 +81,7 @@ h1 {
   align-items: center;
   color: hsl(222.35deg 13.82% 24.12%);
   font-weight: 500;
+  user-select: none;
 }
 
 .input {
@@ -99,6 +108,12 @@ h1 {
   font-size: 0.75rem;
   white-space: pre-wrap;
   margin: 0;
+  background-color: #dddfe5;
+  color: hsl(227 74% 24% / 1);
+  padding: 0.5rem 1rem;
+  min-width: 25rem;
+  max-width: 670px;
+  box-shadow: inset 0 1px 1px 0 rgb(0 0 0 / 0.05);
 }
 
 .output .line {
@@ -110,6 +125,9 @@ h1 {
   flex-wrap: wrap;
   gap: 0.25rem;
   max-width: 16rem;
+  background-color: hsl(220 13% 88% / 1);
+  padding: 0.5rem;
+  box-shadow: inset 0 1px 1px 0 rgb(0 0 0 / 0.05);
 }
 
 .keyboard .section {
@@ -149,4 +167,10 @@ h1 {
 
 .keyboard button:hover {
   background-color: rgba(0, 0, 0, 0.25);
+}
+
+@media screen and (max-width: 900px) {
+  .keyboard {
+    max-width: 750px;
+  }
 }

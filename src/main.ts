@@ -26,7 +26,9 @@ const header = document.createElement('header')
 const main = document.createElement('main')
 
 const left = document.createElement('div')
+left.classList.add('left')
 const right = document.createElement('div')
+right.classList.add('right')
 
 const inputContainer = document.createElement('div')
 inputContainer.classList.add('input-container')
@@ -65,8 +67,8 @@ input.value = DEFAULT_VALUE
 inputContainer.appendChild(lineNumbers)
 inputContainer.appendChild(input)
 
-left.appendChild(inputContainer)
 left.appendChild(keyboard)
+left.appendChild(inputContainer)
 right.appendChild(output)
 
 header.appendChild(title)
