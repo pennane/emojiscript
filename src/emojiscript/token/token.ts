@@ -8,6 +8,15 @@ export const invertObj = <K extends ValidKey, V extends ValidKey>(
     {} as Record<V, K>
   )
 
+export const COMMENT = {
+  SINGLE_LINE: '💬'
+}
+
+export const COMMENT_TO_TYPE = invertObj(COMMENT)
+
+export const isComment = (c: string | null) =>
+  COMMENT_TO_TYPE[c as keyof typeof COMMENT_TO_TYPE] !== undefined
+
 export const CHARACTER = {
   A: '🅰️',
   B: '🅱️',

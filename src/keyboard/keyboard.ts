@@ -1,5 +1,6 @@
 import {
   CHARACTER,
+  COMMENT,
   DATA_STRUCTURE,
   DELIMITER,
   KEYWORD,
@@ -10,6 +11,7 @@ import {
 type Section = [name: string, map: Record<string, string>]
 
 const sections = [
+  ['comments', COMMENT],
   ['operators', OPERATOR],
   ['numbers', NUMBER],
   ['characters', CHARACTER],

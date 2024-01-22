@@ -7,6 +7,7 @@ import {
   OPERATOR_TO_TYPE,
   Token,
   isCharacter,
+  isComment,
   isDataStructure,
   isDelimiter,
   isKeyword,
@@ -35,6 +36,7 @@ export class Lexer {
 
   nextToken(): Token {
     this.skipWhitespace()
+    this.skipComments()
     const c = this.ch
     if (!c) return newToken('END_OF_FILE', 'END_OF_FILE')
     if (isNumber(c)) return this.readNumber()
@@ -74,6 +76,15 @@ export class Lexer {
       this.readChar()
       c = this.ch
     }
+  }
+
+  private skipComments(): void {
+    if (!isComment(this.ch)) return
+    this.readChar()
+    while (this.ch !== '\n' && this.ch !== null) {
+      this.readChar()
+    }
+    this.readChar()
   }
 
   private readNumber(): Token {
