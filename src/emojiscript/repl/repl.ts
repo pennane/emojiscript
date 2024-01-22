@@ -9,17 +9,21 @@ export class Repl {
     const parser = new Parser(lexer)
     const program = parser.parseProgram()
     const errors = parser.getErrors()
-    let evaluated
+
+    let evaluated: string
 
     try {
-      evaluated = evaluate(program)
+      evaluated = evaluate(program).inspect()
     } catch (e: any) {
       evaluated = e.message
     }
 
     this.print(
       JSON.stringify(
-        { evaluated, ast: { string: program.string(), errors, program } },
+        {
+          evaluated: evaluated,
+          ast: { string: program.string(), errors, program }
+        },
         null,
         4
       )

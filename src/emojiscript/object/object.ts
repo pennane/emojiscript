@@ -1,4 +1,4 @@
-enum DataObjectType {
+export enum DataObjectType {
   Number = 'number',
   Boolean = 'boolean',
   Null = 'null'
@@ -9,15 +9,15 @@ export type DataObject = {
   inspect: () => string
 }
 
-export interface Number extends DataObject {
+export interface NumberObject extends DataObject {
   value: number
 }
 
-function numberInspect(this: Number): string {
+function numberInspect(this: NumberObject): string {
   return String(this.value)
 }
 
-export const createNumber = (value: number): Number => {
+export const createNumber = (value: number): NumberObject => {
   return {
     type: DataObjectType.Number,
     inspect: numberInspect,
@@ -25,31 +25,53 @@ export const createNumber = (value: number): Number => {
   }
 }
 
-export interface Boolean extends DataObject {
+export const isNumber = (obj: DataObject): obj is NumberObject => {
+  return obj.type === DataObjectType.Number
+}
+
+export interface BooleanObject extends DataObject {
   value: boolean
 }
 
-function booleanInspect(this: Boolean): string {
+function booleanInspect(this: BooleanObject): string {
   return this.value ? 'true' : 'false'
 }
 
-export const createBoolean = (value: boolean): Boolean => {
-  return {
-    type: DataObjectType.Boolean,
-    inspect: booleanInspect,
-    value
-  }
+const TRUE: BooleanObject = {
+  type: DataObjectType.Boolean,
+  inspect: booleanInspect,
+  value: true
 }
 
-export interface Null extends DataObject {}
+const FALSE: BooleanObject = {
+  type: DataObjectType.Boolean,
+  inspect: booleanInspect,
+  value: false
+}
 
-function nullInspect(this: Null): string {
+export const createBoolean = (value: boolean): BooleanObject => {
+  return value ? TRUE : FALSE
+}
+
+export const isBoolean = (obj: DataObject): obj is BooleanObject => {
+  return obj.type === DataObjectType.Boolean
+}
+
+export interface NullObject extends DataObject {}
+
+function nullInspect(this: NullObject): string {
   return 'null'
 }
 
-export const createNull = (): Null => {
-  return {
-    type: DataObjectType.Null,
-    inspect: nullInspect
-  }
+const NULL: NullObject = {
+  type: DataObjectType.Null,
+  inspect: nullInspect
+}
+
+export const createNull = (): NullObject => {
+  return NULL
+}
+
+export const isNull = (obj: DataObject): obj is NullObject => {
+  return obj.type === DataObjectType.Null
 }
