@@ -311,7 +311,7 @@ export class Parser {
   private parseNumberLiteral(): NumberLiteral | null {
     const numberLiteralToken = this.currentToken
     const value = numberLiteralToNumber(numberLiteralToken.literal)
-    if (!value) {
+    if (value === null) {
       this.errorInvalidNumber(numberLiteralToken.literal)
       return null
     }

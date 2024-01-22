@@ -1,5 +1,6 @@
 import { evaluate } from '../evaluator/evaluator'
 import { Lexer } from '../lexer/lexer'
+import { Environment } from '../object/environment'
 import { Parser } from '../parser/parser'
 
 export class Repl {
@@ -10,19 +11,16 @@ export class Repl {
     const program = parser.parseProgram()
     const errors = parser.getErrors()
 
-    let evaluated: string
+    const environment = new Environment()
 
-    try {
-      evaluated = evaluate(program).inspect()
-    } catch (e: any) {
-      evaluated = e.message
-    }
+    const evaluated = evaluate(program, environment).inspect()
 
     this.print(
       JSON.stringify(
         {
           evaluated: evaluated,
-          ast: { string: program.string(), errors, program }
+          ast: { string: program.string(), errors, program },
+          environment: environment.entries()
         },
         null,
         4

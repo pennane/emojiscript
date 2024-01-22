@@ -1,75 +1,117 @@
 import {
+  BlockStatement,
   Boolean,
   ExpressionStatement,
+  Identifier,
+  IfExpression,
   InfixExpression,
+  LetStatement,
   Node,
   NodeType,
   NumberLiteral,
   PrefixExpression,
   Program,
-  Statement
+  ReturnStatement
 } from '../ast/ast'
+import { Environment } from '../object/environment'
 import {
   BooleanObject,
   DataObject,
   DataObjectType,
   NumberObject,
   createBoolean,
+  createError,
   createNull,
   createNumber,
-  isNumber
+  createReturnValue,
+  isBoolean,
+  isError,
+  isNull,
+  isNumber,
+  isReturnValue
 } from '../object/object'
 import { OPERATOR } from '../token/token'
 
-export const evaluate = (node: Node | null): DataObject => {
-  if (!node) {
+const isTruthy = (obj: DataObject): boolean => {
+  if (isNumber(obj)) {
+    return true
+  } else if (isBoolean(obj)) {
+    return obj.value === true
+  } else if (isNull(obj)) {
+    return false
+  }
+  return false
+}
+
+export const evaluate = (
+  node: Node | null,
+  environment: Environment
+): DataObject => {
+  if (node === null) {
     return createNull()
   }
   const evaluator = EVALUATORS[node.type]
   if (!evaluate) {
     return notImplemented(node)
   }
-  return evaluator(node)
+  return evaluator(node, environment)
 }
 
 const notImplemented = (node: Node | DataObject | string): DataObject => {
   if (typeof node === 'string') {
-    throw `Missing evaluator for ${node}`
+    return createError(`Missing evaluator for ${node}`)
   }
-  throw new Error(`Missing evaluator for type ${node.type}`)
+  return createError(`Missing evaluator for type ${node.type}`)
 }
 
-const evaluateNumberLiteral = (node: NumberLiteral): DataObject => {
+const evaluateNumberLiteral = (
+  node: NumberLiteral,
+  _environment: Environment
+): DataObject => {
   return createNumber(node.value)
 }
 
-const evaluateBoolean = (node: Boolean): DataObject => {
+const evaluateBoolean = (
+  node: Boolean,
+  _environment: Environment
+): DataObject => {
   return createBoolean(node.value)
 }
 
-const evaluateProgram = (node: Program): DataObject => {
-  return evaluateStatements(node.statements)
+const evaluateExpressionStatement = (
+  node: ExpressionStatement,
+  environment: Environment
+): DataObject => {
+  return evaluate(node.expression, environment)
 }
 
-const evaluateExpressionStatement = (node: ExpressionStatement): DataObject => {
-  return evaluate(node.expression)
-}
-
-const evaluatePrefixExpression = (node: PrefixExpression): DataObject => {
+const evaluatePrefixExpression = (
+  node: PrefixExpression,
+  environment: Environment
+): DataObject => {
+  const right = evaluate(node.right, environment)
+  if (isError(right)) {
+    return right
+  }
   switch (node.operator) {
     case OPERATOR.BANG: {
-      return evaluateBangOperatorExpression(evaluate(node.right))
+      return evaluateBangOperatorExpression(right, environment)
     }
     case OPERATOR.MINUS: {
-      return evaluateMinusPrefixOperatorExpression(evaluate(node.right))
+      return evaluateMinusPrefixOperatorExpression(right, environment)
     }
     default: {
-      return notImplemented(node)
+      return createError(
+        `Unknown operator: ${node.operator} ${node.right?.type}`
+      )
     }
   }
 }
 
-const evaluateBangOperatorExpression = (right: DataObject): DataObject => {
+const evaluateBangOperatorExpression = (
+  right: DataObject,
+  _environment: Environment
+): DataObject => {
   switch (right.type) {
     case DataObjectType.Number:
     case DataObjectType.Null: {
@@ -86,19 +128,33 @@ const evaluateBangOperatorExpression = (right: DataObject): DataObject => {
 }
 
 const evaluateMinusPrefixOperatorExpression = (
-  right: DataObject
+  right: DataObject,
+  _environment: Environment
 ): DataObject => {
   if (!isNumber(right)) {
-    return createNull()
+    return createError(`Unknown operator - ${right.type}`)
   }
 
   const value = right.value * -1
   return createNumber(value)
 }
 
-const evaluateInfixExpression = (node: InfixExpression): DataObject => {
-  const left = evaluate(node.left)
-  const right = evaluate(node.right)
+const evaluateInfixExpression = (
+  node: InfixExpression,
+  environment: Environment
+): DataObject => {
+  const left = evaluate(node.left, environment)
+
+  if (isError(left)) {
+    return left
+  }
+
+  const right = evaluate(node.right, environment)
+
+  if (isError(right)) {
+    return right
+  }
+
   if (isNumber(left) && isNumber(right)) {
     return evaluateIntegerInfixExpression(node.operator, left, right)
   }
@@ -108,7 +164,9 @@ const evaluateInfixExpression = (node: InfixExpression): DataObject => {
       return createBoolean(left === right)
     }
     default: {
-      return notImplemented(operator)
+      return createError(
+        `Unknown operator: ${node.left?.type} ${node.operator} ${node.right?.type}`
+      )
     }
   }
 }
@@ -143,33 +201,115 @@ const evaluateIntegerInfixExpression = (
       return createBoolean(leftValue === rightValue)
     }
     default: {
-      return notImplemented(operator)
+      return createError(
+        `Unknown operator ${left.type} ${operator} ${right.type}`
+      )
     }
   }
 }
 
-const evaluateStatements = (statements: Statement[]): DataObject => {
+const evaluateIfExpression = (
+  node: IfExpression,
+  environment: Environment
+): DataObject => {
+  const evaluatedCondition = evaluate(node.condition, environment)
+
+  if (isError(evaluatedCondition)) {
+    return evaluatedCondition
+  }
+
+  if (isTruthy(evaluatedCondition)) {
+    return evaluate(node.consequence, environment)
+  }
+  if (node.alternative) {
+    return evaluate(node.alternative, environment)
+  }
+
+  return createNull()
+}
+
+const evaluateBlockStatement = (
+  node: BlockStatement,
+  environment: Environment
+): DataObject => {
   let result: DataObject = createNull()
-  for (const statement of statements) {
-    result = evaluate(statement)
+  for (const statement of node.statements) {
+    result = evaluate(statement, environment)
+
+    if (isReturnValue(result) || isError(result)) {
+      return result
+    }
   }
   return result
 }
 
-const EVALUATORS: Record<NodeType, (n: any) => DataObject> = {
+const evaluateReturnStatement = (
+  node: ReturnStatement,
+  environment: Environment
+): DataObject => {
+  const value = evaluate(node.returnValue, environment)
+  if (isError(value)) {
+    return value
+  }
+  return createReturnValue(value)
+}
+
+const evaluateProgram = (
+  node: Program,
+  environment: Environment
+): DataObject => {
+  let result: DataObject = createNull()
+  for (const statement of node.statements) {
+    result = evaluate(statement, environment)
+
+    if (isError(result)) {
+      return result
+    }
+
+    if (isReturnValue(result)) {
+      return result.value
+    }
+  }
+  return result
+}
+
+const evaluateLetStatement = (
+  node: LetStatement,
+  environment: Environment
+): DataObject => {
+  const value = evaluate(node.value, environment)
+  if (isError(value)) {
+    return value
+  }
+  environment.set(node.name.value, value)
+  return createNull()
+}
+
+const evaluateIdentifier = (
+  node: Identifier,
+  environment: Environment
+): DataObject => {
+  const value = environment.get(node.value)
+  if (value === undefined) {
+    return createError(`Identifer not found: ${node.value}`)
+  }
+  return value
+}
+
+const EVALUATORS: Record<NodeType, (n: any, e: Environment) => DataObject> = {
   [NodeType.Statement]: notImplemented,
   [NodeType.Expression]: notImplemented,
   [NodeType.Program]: evaluateProgram,
-  [NodeType.LetStatement]: notImplemented,
-  [NodeType.ReturnStatement]: notImplemented,
+  [NodeType.LetStatement]: evaluateLetStatement,
+  [NodeType.ReturnStatement]: evaluateReturnStatement,
   [NodeType.ExpressionStatement]: evaluateExpressionStatement,
-  [NodeType.BlockStatement]: notImplemented,
-  [NodeType.Identifier]: notImplemented,
+  [NodeType.BlockStatement]: evaluateBlockStatement,
+  [NodeType.Identifier]: evaluateIdentifier,
   [NodeType.Boolean]: evaluateBoolean,
   [NodeType.NumberLiteral]: evaluateNumberLiteral,
   [NodeType.InfixExpression]: evaluateInfixExpression,
   [NodeType.PrefixExpression]: evaluatePrefixExpression,
-  [NodeType.IfExpression]: notImplemented,
+  [NodeType.IfExpression]: evaluateIfExpression,
   [NodeType.FunctionLiteral]: notImplemented,
   [NodeType.CallExpression]: notImplemented
 }

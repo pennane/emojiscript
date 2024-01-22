@@ -1,7 +1,9 @@
 export enum DataObjectType {
   Number = 'number',
   Boolean = 'boolean',
-  Null = 'null'
+  Null = 'null',
+  ReturnValue = 'return_value',
+  Error = 'error'
 }
 
 export type DataObject = {
@@ -74,4 +76,43 @@ export const createNull = (): NullObject => {
 
 export const isNull = (obj: DataObject): obj is NullObject => {
   return obj.type === DataObjectType.Null
+}
+
+export interface ReturnValue extends DataObject {
+  value: DataObject
+}
+
+function returnValueInspect(this: ReturnValue): string {
+  return this.value.inspect()
+}
+
+export const createReturnValue = (value: DataObject): ReturnValue => {
+  return {
+    type: DataObjectType.ReturnValue,
+    inspect: returnValueInspect,
+    value
+  }
+}
+
+export const isReturnValue = (obj: DataObject): obj is ReturnValue => {
+  return obj.type === DataObjectType.ReturnValue
+}
+
+export interface ErrorObject extends DataObject {
+  message: string
+}
+function errorInspect(this: ErrorObject) {
+  return `ERROR: ${this.message}`
+}
+
+export const createError = (message: string): ErrorObject => {
+  return {
+    type: DataObjectType.Error,
+    inspect: errorInspect,
+    message
+  }
+}
+
+export const isError = (obj: DataObject): obj is ErrorObject => {
+  return obj.type === DataObjectType.Error
 }
