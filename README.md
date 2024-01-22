@@ -10,7 +10,8 @@ Built alongside with [Writing An Interpetter In Go](https://interpreterbook.com/
 
 - [x] lexer
 - [x] parser
-- [ ] evaluator
+- [x] evaluator
+- [ ] lists and hashes
 
 ### Example syntax
 
