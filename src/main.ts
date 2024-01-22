@@ -4,13 +4,17 @@ import './style.css'
 
 const DEFAULT_VALUE = `💬 fibonacci
 📝🅰️➡️🔧🅱️ 🌅
-  🤔 🅱️ 🔽 1️⃣ 🌅 🔙0️⃣ 🌇
-  🤔 🅱️ ⚖️ 1️⃣ 🌅 🔙1️⃣ 🌇
-  🅰️📭🅱️➖1️⃣📬 ➕ 🅰️📭🅱️➖2️⃣📬
+  🅰️2️⃣📭🅱️🔸0️⃣🔸1️⃣📬
 🌇
 
+💬 tail recursive helper
+📝🅰️2️⃣➡️🔧🅰️🔸🅱️🔸🅾️ 🌅
+  🤔 🅰️ ⚖️ 0️⃣ 🌅 🔙 🅱️ 🌇
+  🔙 🅰️2️⃣📭🅰️➖1️⃣🔸🅾️🔸🅱️➕🅾️📬
+🌇
 
-🅰️📭7️⃣📬
+💬 70th member of the fibonacci sequence
+🅰️📭7️⃣0️⃣📬
 `
 
 const app = document.querySelector<HTMLDivElement>('#app')!

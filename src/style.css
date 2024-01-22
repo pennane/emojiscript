@@ -76,12 +76,12 @@ h1 {
 }
 
 .input {
-  width: 21rem;
-  height: 15rem;
+  width: 23rem;
+  height: 21rem;
   min-height: 4rem;
   min-width: 12rem;
-  max-width: 32rem;
-  font-size: 1.1rem;
+  max-width: 35rem;
+  font-size: 0.85rem;
   font-family: 'Fire Code', monospace;
 
   white-space: nowrap;
